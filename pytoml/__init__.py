@@ -1,10 +1,13 @@
 from pyparsing import (
     Combine, Optional, Regex, Forward, Group, Suppress, Keyword, LineEnd, Or,
-    ZeroOrMore, QuotedString, delimitedList, nums, Word, pythonStyleComment,
-    printables,
+    ZeroOrMore, QuotedString, nums, Word, pythonStyleComment, printables,
 )
 from datetime import datetime
 from re import sub
+
+def delimitedList(type_, delimiter=","):
+    return (type_ + ZeroOrMore(Suppress(delimiter) + type_) +
+            Optional(Suppress(delimiter)))
 
 class TOMLParser(object):
     def __init__(self):

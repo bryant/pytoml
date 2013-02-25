@@ -74,3 +74,14 @@ should = ["never", "reach", "here"]
 def test_pure_array():
     source = "impure_list = [1, 2, 3, \"fail\"]"
     pytoml.loads(source)
+
+def test_terminating_comma():
+    source = """\
+# toml
+key = [
+    1,
+    2,  # this is okay
+]
+"""
+    expected = {"key": [1, 2]}
+    assert pytoml.loads(source) == expected
