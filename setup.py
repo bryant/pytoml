@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 install_requires = [
     "pyparsing",
 ]
-tests_require = [
+setup_requires = [
     "nose >= 1.0",
 ]
 
@@ -24,5 +24,6 @@ setup(
 
     packages = find_packages(),
     install_requires = install_requires,
-    tests_require = tests_require,
+    setup_requires = setup_requires,
+    test_suite = "nose.collector",
 )
