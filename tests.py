@@ -57,9 +57,7 @@ data = [ ["gamma", "delta"], [1, 2] ] # just an update to make sure parsers supp
         clients = dict(data = [["gamma", "delta"], [1, 2]]),
     )
 
-    output = pytoml.loads(source)
-    print output
-    assert output == expected
+    assert pytoml.loads(source) == expected
 
 @raises(NameError)
 def test_no_overwrite():
