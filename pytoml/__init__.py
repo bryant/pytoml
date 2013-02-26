@@ -4,6 +4,16 @@ from pyparsing import (
 )
 from datetime import datetime
 from re import sub
+import sys
+
+PY3 = sys.version_info[0] == 3
+
+if PY3:
+    def unescape(s):
+        return bytes(s, "utf-8").decode("unicode_escape")
+else:
+    def unescape(s):
+        return s.decode("unicode_escape")
 
 def delimitedList(type_, delimiter=","):
     return (type_ + ZeroOrMore(Suppress(delimiter) + type_) +
@@ -42,7 +52,7 @@ class TOMLParser(object):
         keyvalue.setParseAction(self._parse_keyvalue)
         keygroup_namespace.setParseAction(self._parse_keygroup_namespace)
 
-    _parse_string = lambda self, tok: bytes(tok[0]).decode("unicode_escape")
+    _parse_string = lambda self, tok: unescape(tok[0])
     _parse_integer = lambda self, tok: int(tok[0])
     _parse_float = lambda self, tok: float(tok[0])
     _parse_boolean = lambda self, tok: bool(tok[0])
