@@ -1,8 +1,15 @@
 from setuptools import setup, find_packages
+import sys
 
-install_requires = [
-    "pyparsing < 2.0.0",
-]
+PY3 = sys.version_info[0] == 3
+
+install_requires = []
+
+if PY3:
+    install_requires.append("pyparsing >= 2.0.0")
+else:
+    install_requires.append("pyparsing < 2.0.0")
+
 setup_requires = [
     "nose >= 1.0",
 ]
