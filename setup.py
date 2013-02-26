@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 install_requires = [
-    "pyparsing",
+    "pyparsing < 2.0.0",
 ]
 setup_requires = [
     "nose >= 1.0",
