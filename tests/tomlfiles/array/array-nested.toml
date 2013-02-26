@@ -1,0 +1,1 @@
+twoarrays     = [ [ 1, 2 ], ["a", "b", "c"] ] # this is ok

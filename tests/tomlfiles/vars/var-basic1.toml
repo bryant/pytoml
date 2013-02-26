@@ -1,0 +1,2 @@
+ip = "1.1.1.1"
+IP = "4.4.4.4"  # This is OK - case-sensitive
