@@ -1,4 +1,3 @@
-import os.path
 from datetime import datetime as dt
 from nose.tools import raises
 from pyparsing import ParseException
