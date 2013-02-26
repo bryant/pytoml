@@ -26,7 +26,7 @@ class TOMLParser(object):
         basic_int = Optional("-") + ("0" | Word(nums))
 
         types = dict(
-            string = QuotedString("\""),
+            string = QuotedString("\"", escChar="\\"),
             integer = Combine(basic_int),
             float = Combine(basic_int + "." + Word(nums)),
             datetime = Regex(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"),
