@@ -5,7 +5,7 @@ from pyparsing import ParseException
 import os
 import pytoml
 
-TOMLS = os.path.join(os.path.dirname(__file__), 'tomlfiles')
+TOMLS = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tomlfiles')
 
 def test_toml_files():
     for filename in os.listdir(TOMLS):
