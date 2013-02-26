@@ -1,0 +1,9 @@
+{
+        'null': '\0',
+        'tab': '\t',
+        'newline': '\n',
+        'cr': '\r',
+        'singlequote': "'",
+        'doublequote': '"',
+        'backslash': '\\',
+    }

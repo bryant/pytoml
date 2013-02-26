@@ -1,0 +1,5 @@
+[fruit]  # this is ok
+type = "apple"
+
+[veggie]   tomato = "yes"  # this is not
+
