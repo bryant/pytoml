@@ -95,10 +95,9 @@ def test_string_basic1():
         assert pytoml.loads(txt) == expected
 
 def test_string_basic2():
-    expected = {'quote': "I'm a string. \"You can quote me\". Tab \t newline \n you get it."}
+    expected = {'quoted': "I'm a string. \"You can quote me\". Tab \t newline \n you get it."}
     with open(os.path.join(TOMLS, 'string', 'string-basic2.toml')) as f:
         txt = f.read()
-        # TODO: triggers a bug!!
         assert pytoml.loads(txt) == expected
 
 def test_string_special():
@@ -107,15 +106,12 @@ def test_string_special():
         'tab': '\t',
         'newline': '\n',
         'cr': '\r',
-        'singlequote1': "'",
-        'singlequote2': "'",
-        'doublequote1': '"',
-        'doublequote2': '"',
+        'singlequote': "'",
+        'doublequote': '"',
         'backslash': '\\',
     }
     with open(os.path.join(TOMLS, 'string', 'string-special1.toml')) as f:
         txt = f.read()
-        # TODO: triggers a bug!!
         assert pytoml.loads(txt) == expected
 
 @raises(ParseException)
