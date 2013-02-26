@@ -1,9 +1,7 @@
 null = "\0"
-tab = '\t'
-newline = '\n'
+tab = "\t"
+newline = "\n"
 cr = "\r"
-singlequote1 = "'"
-singlequote2 = '\''
-doublequote1 = '"'
-doublequote2 = "\""
-backslash = '\\'
+singlequote = "'"
+doublequote = "\""
+backslash = "\\"
