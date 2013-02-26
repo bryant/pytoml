@@ -11,3 +11,11 @@ and earlier.
 >>> pytoml.loads('hooray = ["for", "toml"]')
 {'hooray': [u'for', u'toml']}
 ```
+
+
+Features
+--------
+
+* Uses [pyparsing](http://pyparsing.wikispaces.com/) and a formal grammar
+* Extensive test suite and sample files
+
