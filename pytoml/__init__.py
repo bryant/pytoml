@@ -24,11 +24,11 @@ class TOMLParser(object):
             array = Forward(),
         )
 
-        pure_array = Or(delimitedList(type_) for type_ in types.itervalues())
+        pure_array = Or(delimitedList(type_) for type_ in types.values())
         types["array"] << Group(Suppress("[") + Optional(pure_array) +
                                 Suppress("]"))
 
-        value = Or(type_ for type_ in types.itervalues())
+        value = Or(type_ for type_ in types.values())
         keyvalue = key_name + Suppress("=") + value + Suppress(LineEnd())
         keygroup_namespace = kgrp_name + ZeroOrMore(Suppress(".") + kgrp_name)
         keygroup = "[" + keygroup_namespace + "]" + LineEnd()
@@ -37,12 +37,12 @@ class TOMLParser(object):
         self._toplevel = ZeroOrMore(keyvalue | keygroup)
         self._toplevel.ignore(comments)
 
-        for k, v in types.iteritems():
+        for k, v in types.items():
             v.setParseAction(getattr(self, "_parse_"+k))
         keyvalue.setParseAction(self._parse_keyvalue)
         keygroup_namespace.setParseAction(self._parse_keygroup_namespace)
 
-    _parse_string = lambda self, tok: tok[0].decode("unicode_escape")
+    _parse_string = lambda self, tok: bytes(tok[0]).decode("unicode_escape")
     _parse_integer = lambda self, tok: int(tok[0])
     _parse_float = lambda self, tok: float(tok[0])
     _parse_boolean = lambda self, tok: bool(tok[0])
