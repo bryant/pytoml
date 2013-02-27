@@ -20,7 +20,7 @@ def test_toml_files():
 
         if "invalid" in filename:
             @fancy_desc
-            @raises(ParseException, NameError, ValueError)  # god.
+            @raises(ParseException, NameError)  # god.
             def check_fail(s):
                 pytoml.loads(s)
 

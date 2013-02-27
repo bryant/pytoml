@@ -1,6 +1,7 @@
 from pyparsing import (
     Combine, Optional, Regex, Forward, Group, Suppress, Keyword, LineEnd, Or,
     ZeroOrMore, QuotedString, nums, Word, pythonStyleComment, printables,
+    ParseException
 )
 from datetime import datetime
 from re import sub
@@ -58,9 +59,14 @@ class TOMLParser(object):
     _parse_boolean = lambda self, tok: bool(tok[0])
 
     ISO8601 = "%Y-%m-%dT%H:%M:%SZ"
-    _parse_datetime = lambda self, tok: datetime.strptime(tok[0], self.ISO8601)
 
     _parse_array = lambda self, tok: [tok[0]]
+
+    def _parse_datetime(self, tok):
+        try:
+            return datetime.strptime(tok[0], self.ISO8601)
+        except ValueError:
+            raise ParseException(tok[0])
 
     def _parse_keyvalue(self, s, loc, toks):
         k, v = toks.asList()
