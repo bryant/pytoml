@@ -16,6 +16,8 @@ else:
     def unescape(s):
         return s.decode("string_escape")
 
+ISO8601 = "%Y-%m-%dT%H:%M:%SZ"
+
 def delimitedList(type_, delimiter=","):
     return (type_ + ZeroOrMore(Suppress(delimiter) + type_) +
             Optional(Suppress(delimiter)))
@@ -64,11 +66,9 @@ class TOMLParser(object):
     _parse_float = lambda self, tok: float(tok[0])
     _parse_boolean = lambda self, tok: bool(tok[0])
 
-    ISO8601 = "%Y-%m-%dT%H:%M:%SZ"
-
     def _parse_datetime(self, src, loc, toks):
         try:
-            return datetime.strptime(toks[0], self.ISO8601)
+            return datetime.strptime(toks[0], ISO8601)
         except ValueError:
             # this informative error message will never make it out because
             # pyparsing catches ParseBaseException and reraises on its own.

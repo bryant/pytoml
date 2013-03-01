@@ -1,3 +1,3 @@
 {
-        'dob': dt.strptime("1982-10-22T23:59:00Z", pytoml.TOMLParser.ISO8601)
+        'dob': dt.strptime("1982-10-22T23:59:00Z", pytoml.ISO8601)
     }
