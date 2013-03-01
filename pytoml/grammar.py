@@ -18,53 +18,61 @@ else:
 
 ISO8601 = "%Y-%m-%dT%H:%M:%SZ"
 
-def delimitedList(type_, delimiter=","):
-    return (type_ + ZeroOrMore(Suppress(delimiter) + type_) +
-            Optional(Suppress(delimiter)))
 
 class TOMLParser(object):
-    def __init__(self):
-        key_name = Word(re.sub(r"[\[\]=\"]", "", printables))
-        kgrp_name = Word(re.sub(r"[\[\]\.]", "", printables))
-        basic_int = Optional("-") + ("0" | Word(nums))
+    # Grammar.
+    basic_int = Optional("-") + ("0" | Word(nums))
 
-        types = dict(
-            string = QuotedString("\"", escChar="\\"),
-            integer = Combine(basic_int),
-            float = Combine(basic_int + "." + Word(nums)),
-            datetime = Regex(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"),
-            boolean = Keyword("true") | Keyword("false"),
-            array = Forward(),
-        )
+    string = QuotedString("\"", escChar="\\")
+    integer = Combine(basic_int)
+    float_ = Combine(basic_int + "." + Word(nums))
+    datetime = Regex(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
+    boolean = Keyword("true") | Keyword("false")
 
-        pure_array = Or(delimitedList(type_) for type_ in types.values())
-        types["array"] << Group(Suppress("[") + Optional(pure_array) +
-                                Suppress("]"))
+    array = Forward()
+    array_delim = comma = Suppress(",")
 
-        value = Or(type_ for type_ in types.values())
-        keyvalue = key_name + Suppress("=") + value + Suppress(LineEnd())
-        keygroup_namespace = kgrp_name + ZeroOrMore(Suppress(".") + kgrp_name)
-        keygroup = "[" + keygroup_namespace + "]" + LineEnd()
-        comments = pythonStyleComment
+    string_array = string + ZeroOrMore(comma + string) + Optional(comma)
+    integer_array = integer + ZeroOrMore(comma + integer) + Optional(comma)
+    float_array = float_ + ZeroOrMore(comma + float_) + Optional(comma)
+    datetime_array = datetime + ZeroOrMore(comma + datetime) + Optional(comma)
+    boolean_array = boolean + ZeroOrMore(comma + boolean) + Optional(comma)
+    array_array = array + ZeroOrMore(comma + array) + Optional(comma)
 
-        self._toplevel = ZeroOrMore(keyvalue | keygroup)
-        self._toplevel.ignore(comments)
+    array <<  Group(Suppress("[")
+                    + (datetime_array | string_array | integer_array |
+                       float_array | boolean_array)
+                    + Suppress("]"))
 
-        for k, v in types.items():
-            v.setParseAction(getattr(self, "_parse_"+k))
-        keyvalue.setParseAction(self._parse_keyvalue)
-        keygroup_namespace.setParseAction(self._parse_keygroup_namespace)
+    key_name = Word(re.sub(r"[\[\]=\"]", "", printables))
+    value = datetime | string | integer | float_ | boolean | array
+    keyvalue = key_name + "=" + value + LineEnd()
+
+    kgrp_name = Word(re.sub(r"[\[\]\.]", "", printables))
+    keygroup_namespace = kgrp_name + ZeroOrMore(Suppress(".") + kgrp_name)
+    keygroup = Suppress("[") + keygroup_namespace + Suppress("]") + LineEnd()
+
+    comments = pythonStyleComment
+
+    toml_doc = ZeroOrMore(keyvalue | keygroup).ignore(comments)
+
 
     def _parse_string(self, src, loc, toks):
+        # only permit toml-reserved escapes.
         match = re.search(r"(?<!\\)(\\[^0tnr\"\\])", toks[0])
         if match:
             raise ParseException("Reserved escape sequence \"%s\"" %
                                  match.group(), loc)
         return unescape(toks[0])
 
-    _parse_integer = lambda self, tok: int(tok[0])
-    _parse_float = lambda self, tok: float(tok[0])
-    _parse_boolean = lambda self, tok: bool(tok[0])
+    def _parse_integer(self, src, loc, toks):
+        return int(toks[0])
+
+    def _parse_float_(self, src, loc, toks):
+        return float(toks[0])
+
+    def _parse_boolean(self, src, loc, toks):
+        return bool(toks[0])
 
     def _parse_datetime(self, src, loc, toks):
         try:
@@ -75,15 +83,16 @@ class TOMLParser(object):
             # oh well.
             raise ParseException("invalid datetime \"%s\"" % toks[0], loc)
 
-    _parse_array = lambda self, tok: [tok[0]]
+    def _parse_array(self, src, loc, toks):
+        return [toks[0]]
 
-    def _parse_keyvalue(self, s, loc, toks):
+    def _parse_keyvalue(self, src, loc, toks):
         k, v = toks.asList()
         if k in self._cur:
             raise ParseException("key %s already exists" % k, loc)
         self._cur[k] = v
 
-    def _parse_keygroup_namespace(self, s, loc, toks):
+    def _parse_keygroup_namespace(self, src, loc, toks):
         cur = self._root
         for subname in toks:
             subspace = cur.get(subname, {})
@@ -92,11 +101,15 @@ class TOMLParser(object):
             cur = cur.setdefault(subname, subspace)
         self._cur = cur
 
+    for entity in ("string", "integer", "float_", "datetime", "boolean",
+                   "array", "keyvalue", "keygroup_namespace"):
+        locals()[entity].setParseAction(locals()["_parse_"+entity])
+
     def parse(self, s):
         self._root = {}
         self._cur = self._root
-        self._toplevel.parseWithTabs()
-        self._toplevel.parseString(s, parseAll=True)
+        self.toml_doc.parseWithTabs()
+        self.toml_doc.parseString(s, parseAll=True)
         return self._root
 
 def loads(string):
