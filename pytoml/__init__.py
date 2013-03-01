@@ -4,7 +4,7 @@ from pyparsing import (
     ParseException,
 )
 from datetime import datetime
-from re import sub
+import re
 import sys
 
 PY3 = sys.version_info[0] == 3
@@ -22,8 +22,8 @@ def delimitedList(type_, delimiter=","):
 
 class TOMLParser(object):
     def __init__(self):
-        key_name = Word(sub(r"[\[\]=\"]", "", printables))
-        kgrp_name = Word(sub(r"[\[\]\.]", "", printables))
+        key_name = Word(re.sub(r"[\[\]=\"]", "", printables))
+        kgrp_name = Word(re.sub(r"[\[\]\.]", "", printables))
         basic_int = Optional("-") + ("0" | Word(nums))
 
         types = dict(
@@ -53,7 +53,13 @@ class TOMLParser(object):
         keyvalue.setParseAction(self._parse_keyvalue)
         keygroup_namespace.setParseAction(self._parse_keygroup_namespace)
 
-    _parse_string = lambda self, tok: unescape(tok[0])
+    def _parse_string(self, src, loc, toks):
+        match = re.search(r"(?<!\\)(\\[^0tnr\"\\])", toks[0])
+        if match:
+            raise ParseException("Reserved escape sequence \"%s\"" %
+                                 match.group(), loc)
+        return unescape(toks[0])
+
     _parse_integer = lambda self, tok: int(tok[0])
     _parse_float = lambda self, tok: float(tok[0])
     _parse_boolean = lambda self, tok: bool(tok[0])
