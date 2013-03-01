@@ -14,7 +14,7 @@ if PY3:
         return bytes(s, "utf-8").decode("unicode_escape")
 else:
     def unescape(s):
-        return s.decode("unicode_escape")
+        return s.decode("string_escape")
 
 def delimitedList(type_, delimiter=","):
     return (type_ + ZeroOrMore(Suppress(delimiter) + type_) +
