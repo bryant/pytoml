@@ -1,6 +1,7 @@
 from pyparsing import (
     Combine, Optional, Regex, Forward, Group, Suppress, Keyword, LineEnd, Or,
     ZeroOrMore, QuotedString, nums, Word, pythonStyleComment, printables,
+    ParseException,
 )
 from datetime import datetime
 from re import sub
@@ -58,14 +59,22 @@ class TOMLParser(object):
     _parse_boolean = lambda self, tok: bool(tok[0])
 
     ISO8601 = "%Y-%m-%dT%H:%M:%SZ"
-    _parse_datetime = lambda self, tok: datetime.strptime(tok[0], self.ISO8601)
+
+    def _parse_datetime(self, src, loc, toks):
+        try:
+            return datetime.strptime(toks[0], self.ISO8601)
+        except ValueError:
+            # this informative error message will never make it out because
+            # pyparsing catches ParseBaseException and reraises on its own.
+            # oh well.
+            raise ParseException("invalid datetime \"%s\"" % toks[0], loc)
 
     _parse_array = lambda self, tok: [tok[0]]
 
     def _parse_keyvalue(self, s, loc, toks):
         k, v = toks.asList()
         if k in self._cur:
-            raise NameError("key %s already exists" % k)
+            raise ParseException("key %s already exists" % k, loc)
         self._cur[k] = v
 
     def _parse_keygroup_namespace(self, s, loc, toks):
@@ -73,7 +82,7 @@ class TOMLParser(object):
         for subname in toks:
             subspace = cur.get(subname, {})
             if not isinstance(subspace, dict):
-                raise NameError("key %s already exists" % subname)
+                raise ParseException("key %s already exists" % subname, loc)
             cur = cur.setdefault(subname, subspace)
         self._cur = cur
 
