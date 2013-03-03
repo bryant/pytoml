@@ -27,10 +27,15 @@ def test_toml_files():
             yield check_fail, toml
 
         else:
-            expected = eval(open(abs[:-4]+"expected").read())
+            @fancy_desc
+            def syntax_check(s):
+                eval(s)
+
+            expected_expr = open(abs[:-4]+"expected").read()
+            yield syntax_check, expected_expr
 
             @fancy_desc
-            def check(s):
+            def check(s, expected):
                 assert pytoml.loads(s) == expected
 
-            yield check, toml
+            yield check, toml, eval(expected_expr)
