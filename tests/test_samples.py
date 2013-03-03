@@ -1,5 +1,5 @@
 from datetime import datetime as dt
-from nose.tools import raises
+from nose.tools import raises, assert_equal
 from pyparsing import ParseException
 import os
 import pytoml
@@ -36,6 +36,6 @@ def test_toml_files():
 
             @fancy_desc
             def check(s, expected):
-                assert pytoml.loads(s) == expected
+                assert_equal(pytoml.loads(s), expected)
 
             yield check, toml, eval(expected_expr)
